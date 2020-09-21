@@ -221,8 +221,10 @@ public class DoodleActivity extends Activity {
                 try {
                     outputStream = new FileOutputStream(file);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 95, outputStream);
+
                     ///[FIX#在文件浏览器中出现无效的图片！应注释掉下面一行]
 //                    ImageUtils.addImage(getContentResolver(), file.getAbsolutePath());
+
                     Intent intent = new Intent();
                     intent.putExtra(KEY_IMAGE_PATH, file.getAbsolutePath());
                     setResult(Activity.RESULT_OK, intent);
