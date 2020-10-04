@@ -5,14 +5,16 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.yongtiger'
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdkVersion setup.compileSdk
+    buildToolsVersion setup.buildTools
 
     defaultConfig {
-        minSdkVersion MIN_SDK_VERSION as int
-        targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode VERSION_CODE as int
-        versionName VERSION_NAME
+        minSdkVersion setup.minSdk
+        targetSdkVersion setup.targetSdk
+        versionCode release.versionCode
+        versionName release.versionName
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,6 +24,8 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+
     // https://github.com/1993hzw/Androids
     api 'com.github.1993hzw:Androids:1.3'
 }

@@ -1,4 +1,18 @@
 buildscript {
+    ext {
+        setup = [
+                compileSdk : 30,
+                buildTools : "30.0.0",
+                minSdk     : 14,
+                targetSdk  : 30
+        ]
+
+        release = [
+                versionName: "16.0.0",   ///v16.0.0#AndroidX
+                versionCode: 160000
+        ]
+    }
+
     repositories {
         google()
         jcenter()
