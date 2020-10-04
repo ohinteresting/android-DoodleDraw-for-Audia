@@ -73,6 +73,7 @@ public class DoodleActivity extends Activity {
     public static void startActivityForResult(Activity activity, DoodleParams params, int requestCode) {
         Intent intent = new Intent(activity, DoodleActivity.class);
         intent.putExtra(DoodleActivity.KEY_PARAMS, params);
+
         activity.startActivityForResult(intent, requestCode);
     }
 

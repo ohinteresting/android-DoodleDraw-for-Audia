@@ -1,13 +1,20 @@
 package cn.hzw.doodledemo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -19,7 +26,12 @@ import cn.hzw.doodledemo.guide.DoodleGuideActivity;
 import cn.hzw.imageselector.ImageLoader;
 import cn.hzw.imageselector.ImageSelectorActivity;
 
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
 public class MainActivity extends Activity {
+    private static final int REQUEST_CODE_PERMISSIONS = 1;
+
+    ///[权限申请]
+    private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     public static final int REQ_CODE_SELECT_IMAGE = 100;
     public static final int REQ_CODE_DOODLE = 101;
@@ -29,6 +41,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ///[权限申请]当手机系统大于 23 时，才有必要去判断权限是否获取
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // 检查该权限是否已经获取
+            final int permission0 = ContextCompat.checkSelfPermission(this, permissions[0]);
+            final int permission1 = ContextCompat.checkSelfPermission(this, permissions[1]);
+            // 权限是否已经 授权 GRANTED---授权  DENIED---拒绝
+            if (permission0 != PackageManager.PERMISSION_GRANTED || permission1 != PackageManager.PERMISSION_GRANTED) {
+                // 如果没有授予该权限，就去提示用户请求
+                ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS);
+            }
+        }
 
         findViewById(R.id.btn_select_image).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +105,7 @@ public class MainActivity extends Activity {
                 params.mPaintColor = Color.RED;
                 // 是否支持缩放item
                 params.mSupportScaleItem = true;
+
                 // 启动涂鸦页面
                 DoodleActivity.startActivityForResult(MainActivity.this, params, REQ_CODE_DOODLE);
             }

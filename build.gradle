@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "16.0.0",   ///v16.0.0#AndroidX
-                versionCode: 160000
+                versionName: "16.0.1",   ///v16.0.1#参考uCrop添加BitmapLoadTask代码处理网络图片
+                versionCode: 160001
         ]
     }
 
