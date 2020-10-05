@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cn.forward.androids.utils.LogUtil;
@@ -98,7 +100,12 @@ public class MainActivity extends Activity {
                 DoodleParams params = new DoodleParams();
                 params.mIsFullScreen = true;
                 // 图片路径
-                params.mImagePath = list.get(0);
+                params.mImageUri = Uri.parse(list.get(0));
+
+                ///[处理网络图片]
+                params.mImageUri = Uri.parse("http://ljdy.tv/demo/image.jpg");
+                params.mSavePath = new File(getFilesDir(), "test.jpg").getAbsolutePath();
+
                 // 初始画笔大小
                 params.mPaintUnitSize = DoodleView.DEFAULT_SIZE;
                 // 画笔颜色

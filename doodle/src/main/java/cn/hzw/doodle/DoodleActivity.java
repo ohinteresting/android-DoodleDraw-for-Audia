@@ -1,6 +1,7 @@
 package cn.hzw.doodle;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,10 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +27,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Collection;
@@ -35,6 +41,7 @@ import cn.forward.androids.utils.ImageUtils;
 import cn.forward.androids.utils.LogUtil;
 import cn.forward.androids.utils.StatusBarUtil;
 import cn.forward.androids.utils.Util;
+import cn.hzw.doodle.callback.BitmapLoadCallback;
 import cn.hzw.doodle.core.IDoodle;
 import cn.hzw.doodle.core.IDoodleColor;
 import cn.hzw.doodle.core.IDoodleItem;
@@ -46,6 +53,8 @@ import cn.hzw.doodle.core.IDoodleTouchDetector;
 import cn.hzw.doodle.dialog.ColorPickerDialog;
 import cn.hzw.doodle.dialog.DialogController;
 import cn.hzw.doodle.imagepicker.ImageSelectorView;
+import cn.hzw.doodle.model.ExifInfo;
+import cn.hzw.doodle.util.BitmapLoadUtils;
 
 /**
  * 涂鸦界面，根据DoodleView的接口，提供页面交互
@@ -81,34 +90,34 @@ public class DoodleActivity extends Activity {
      * 启动涂鸦界面
      *
      * @param activity
-     * @param imagePath   　图片路径
+     * @param imageUri   　图片路径
      * @param savePath    　保存路径
      * @param isDir       　保存路径是否为目录
      * @param requestCode 　startActivityForResult的请求码
      */
     @Deprecated
-    public static void startActivityForResult(Activity activity, String imagePath, String savePath, boolean isDir, int requestCode) {
+    public static void startActivityForResult(Activity activity, Uri imageUri, String savePath, boolean isDir, int requestCode) {
         DoodleParams params = new DoodleParams();
-        params.mImagePath = imagePath;
+        params.mImageUri = imageUri;
         params.mSavePath = savePath;
         params.mSavePathIsDir = isDir;
         startActivityForResult(activity, params, requestCode);
     }
 
     /**
-     * {@link DoodleActivity#startActivityForResult(Activity, String, String, boolean, int)}
+     * {@link DoodleActivity#startActivityForResult(Activity, Uri, String, boolean, int)}
      */
     @Deprecated
-    public static void startActivityForResult(Activity activity, String imagePath, int requestCode) {
+    public static void startActivityForResult(Activity activity, Uri imageUri, int requestCode) {
         DoodleParams params = new DoodleParams();
-        params.mImagePath = imagePath;
+        params.mImageUri = imageUri;
         startActivityForResult(activity, params, requestCode);
     }
 
     public static final String KEY_PARAMS = "key_doodle_params";
     public static final String KEY_IMAGE_PATH = "key_image_path";
 
-    private String mImagePath;
+    private Uri mImageUri;
 
     private FrameLayout mFrameLayout;
     private IDoodle mDoodle;
@@ -166,35 +175,105 @@ public class DoodleActivity extends Activity {
             return;
         }
 
-        mImagePath = mDoodleParams.mImagePath;
-        if (mImagePath == null) {
+        mImageUri = mDoodleParams.mImageUri;
+        if (mImageUri == null) {
             LogUtil.e("TAG", "mImagePath is null!");
             this.finish();
             return;
         }
 
-        LogUtil.d("TAG", mImagePath);
-        if (mDoodleParams.mIsFullScreen) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
-        Bitmap bitmap = ImageUtils.createBitmapFromPath(mImagePath, this);
-        if (bitmap == null) {
-            LogUtil.e("TAG", "bitmap is null!");
-            this.finish();
+        LogUtil.d("TAG", mImageUri.toString());
+
+
+        ///[处理网络图片]
+        BitmapLoadUtils.decodeBitmapInBackground(this, mImageUri, mDoodleParams.mSavePath, 0, 0,
+                new BitmapLoadCallback() {
+
+                    @Override
+                    public void onBitmapLoaded(@NonNull Bitmap bitmap, @NonNull ExifInfo exifInfo, @NonNull String imageInputPath, @Nullable String imageOutputPath) {
+                        ///[处理网络图片#initDoodleView]
+                        initDoodleView(bitmap);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Exception bitmapWorkerException) {
+                        Log.e(TAG, "onFailure: setImageUri", bitmapWorkerException);
+                    }
+                });
+
+
+        initView();
+    }
+
+    private boolean canChangeColor(IDoodlePen pen) {
+        return pen != DoodlePen.ERASER
+                && pen != DoodlePen.BITMAP
+                && pen != DoodlePen.COPY
+                && pen != DoodlePen.MOSAIC;
+    }
+
+    // 添加文字
+    private void createDoodleText(final DoodleText doodleText, final float x, final float y) {
+        if (isFinishing()) {
             return;
         }
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.doodle_layout);
-        mFrameLayout = (FrameLayout) findViewById(R.id.doodle_container);
+        DialogController.showInputTextDialog(this, doodleText == null ? null : doodleText.getText(), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = (v.getTag() + "").trim();
+                if (TextUtils.isEmpty(text)) {
+                    return;
+                }
+                if (doodleText == null) {
+                    IDoodleSelectableItem item = new DoodleText(mDoodle, text, mDoodle.getSize(), mDoodle.getColor().copy(), x, y);
+                    mDoodle.addItem(item);
+                    mTouchGestureListener.setSelectedItem(item);
+                } else {
+                    doodleText.setText(text);
+                }
+                mDoodle.refresh();
+            }
+        }, null);
+        if (doodleText == null) {
+            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
+        }
+    }
 
+    // 添加贴图
+    private void createDoodleBitmap(final DoodleBitmap doodleBitmap, final float x, final float y) {
+        DialogController.showSelectImageDialog(this, new ImageSelectorView.ImageSelectorListener() {
+            @Override
+            public void onCancel() {
+            }
+
+            @Override
+            public void onEnter(List<String> pathList) {
+                Bitmap bitmap = ImageUtils.createBitmapFromPath(pathList.get(0), mDoodleView.getWidth() / 4, mDoodleView.getHeight() / 4);
+
+                if (doodleBitmap == null) {
+                    IDoodleSelectableItem item = new DoodleBitmap(mDoodle, bitmap, mDoodle.getSize(), x, y);
+                    mDoodle.addItem(item);
+                    mTouchGestureListener.setSelectedItem(item);
+                } else {
+                    doodleBitmap.setBitmap(bitmap);
+                }
+                mDoodle.refresh();
+            }
+        });
+    }
+
+
+    /* --------- ///[处理网络图片#initDoodleView] --------- */
+    @SuppressLint("ClickableViewAccessibility")
+    private void initDoodleView(@NonNull Bitmap bitmap) {
         /*
         Whether or not to optimize drawing, it is suggested to open, which can optimize the drawing speed and performance.
         Note: When item is selected for editing after opening, it will be drawn at the top level, and not at the corresponding level until editing is completed.
         是否优化绘制，建议开启，可优化绘制速度和性能.
         注意：开启后item被选中编辑时时会绘制在最上面一层，直到结束编辑后才绘制在相应层级
          */
-        mDoodle = mDoodleView = new DoodleViewWrapper(this, bitmap, mDoodleParams.mOptimizeDrawing, new IDoodleListener() {
+        mDoodle = mDoodleView = new DoodleViewWrapper(DoodleActivity.this, bitmap, mDoodleParams.mOptimizeDrawing, new IDoodleListener() {
             @Override
             public void onSaved(IDoodle doodle, Bitmap bitmap, Runnable callback) { // 保存图片为jpg格式
                 File doodleFile = null;
@@ -202,7 +281,9 @@ public class DoodleActivity extends Activity {
                 String savePath = mDoodleParams.mSavePath;
                 boolean isDir = mDoodleParams.mSavePathIsDir;
                 if (TextUtils.isEmpty(savePath)) {
-                    File dcimFile = new File(Environment.getExternalStorageDirectory(), "DCIM");
+                    ///[FIX#不建议使用Environment.getExternalStorageDirectory()]
+//                    File dcimFile = new File(Environment.getExternalStorageDirectory(), "DCIM");
+                    File dcimFile = new File(getFilesDir(), Environment.DIRECTORY_PICTURES);
                     doodleFile = new File(dcimFile, "Doodle");
                     //　保存的路径
                     file = new File(doodleFile, System.currentTimeMillis() + ".jpg");
@@ -223,7 +304,7 @@ public class DoodleActivity extends Activity {
                     outputStream = new FileOutputStream(file);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 95, outputStream);
 
-                    ///[FIX#在文件浏览器中出现无效的图片！应注释掉下面一行]
+                    ///[FIX#应留给用户自行决定是否addImage()]
 //                    ImageUtils.addImage(getContentResolver(), file.getAbsolutePath());
 
                     Intent intent = new Intent();
@@ -363,71 +444,43 @@ public class DoodleActivity extends Activity {
         mDoodle.setDoodleMinScale(mDoodleParams.mMinScale);
         mDoodle.setDoodleMaxScale(mDoodleParams.mMaxScale);
 
-        initView();
-    }
-
-    private boolean canChangeColor(IDoodlePen pen) {
-        return pen != DoodlePen.ERASER
-                && pen != DoodlePen.BITMAP
-                && pen != DoodlePen.COPY
-                && pen != DoodlePen.MOSAIC;
-    }
-
-    // 添加文字
-    private void createDoodleText(final DoodleText doodleText, final float x, final float y) {
-        if (isFinishing()) {
-            return;
-        }
-
-        DialogController.showInputTextDialog(this, doodleText == null ? null : doodleText.getText(), new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = (v.getTag() + "").trim();
-                if (TextUtils.isEmpty(text)) {
-                    return;
-                }
-                if (doodleText == null) {
-                    IDoodleSelectableItem item = new DoodleText(mDoodle, text, mDoodle.getSize(), mDoodle.getColor().copy(), x, y);
-                    mDoodle.addItem(item);
-                    mTouchGestureListener.setSelectedItem(item);
-                } else {
-                    doodleText.setText(text);
-                }
-                mDoodle.refresh();
-            }
-        }, null);
-        if (doodleText == null) {
-            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
-        }
-    }
-
-    // 添加贴图
-    private void createDoodleBitmap(final DoodleBitmap doodleBitmap, final float x, final float y) {
-        DialogController.showSelectImageDialog(this, new ImageSelectorView.ImageSelectorListener() {
-            @Override
-            public void onCancel() {
-            }
+        mDoodleView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
-            public void onEnter(List<String> pathList) {
-                Bitmap bitmap = ImageUtils.createBitmapFromPath(pathList.get(0), mDoodleView.getWidth() / 4, mDoodleView.getHeight() / 4);
-
-                if (doodleBitmap == null) {
-                    IDoodleSelectableItem item = new DoodleBitmap(mDoodle, bitmap, mDoodle.getSize(), x, y);
-                    mDoodle.addItem(item);
-                    mTouchGestureListener.setSelectedItem(item);
-                } else {
-                    doodleBitmap.setBitmap(bitmap);
+            public boolean onTouch(View v, MotionEvent event) {
+                // 隐藏设置面板
+                if (!mBtnHidePanel.isSelected()  // 设置面板没有被隐藏
+                        && mDoodleParams.mChangePanelVisibilityDelay > 0) {
+                    switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                        case MotionEvent.ACTION_DOWN:
+                            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
+                            mSettingsPanel.removeCallbacks(mShowDelayRunnable);
+                            //触摸屏幕超过一定时间才判断为需要隐藏设置面板
+                            mSettingsPanel.postDelayed(mHideDelayRunnable, mDoodleParams.mChangePanelVisibilityDelay);
+                            break;
+                        case MotionEvent.ACTION_CANCEL:
+                        case MotionEvent.ACTION_UP:
+                            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
+                            mSettingsPanel.removeCallbacks(mShowDelayRunnable);
+                            //离开屏幕超过一定时间才判断为需要显示设置面板
+                            mSettingsPanel.postDelayed(mShowDelayRunnable, mDoodleParams.mChangePanelVisibilityDelay);
+                            break;
+                    }
                 }
-                mDoodle.refresh();
+
+                return false;
             }
         });
     }
 
-    //++++++++++++++++++以下为一些初始化操作和点击监听+++++++++++++++++++++++++++++++++++++++++
-
-    //
     private void initView() {
+        if (mDoodleParams.mIsFullScreen) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.doodle_layout);
+        mFrameLayout = (FrameLayout) findViewById(R.id.doodle_container);
+
         mBtnUndo = findViewById(R.id.btn_undo);
         mBtnUndo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -497,34 +550,6 @@ public class DoodleActivity extends Activity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        mDoodleView.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // 隐藏设置面板
-                if (!mBtnHidePanel.isSelected()  // 设置面板没有被隐藏
-                        && mDoodleParams.mChangePanelVisibilityDelay > 0) {
-                    switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                        case MotionEvent.ACTION_DOWN:
-                            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
-                            mSettingsPanel.removeCallbacks(mShowDelayRunnable);
-                            //触摸屏幕超过一定时间才判断为需要隐藏设置面板
-                            mSettingsPanel.postDelayed(mHideDelayRunnable, mDoodleParams.mChangePanelVisibilityDelay);
-                            break;
-                        case MotionEvent.ACTION_CANCEL:
-                        case MotionEvent.ACTION_UP:
-                            mSettingsPanel.removeCallbacks(mHideDelayRunnable);
-                            mSettingsPanel.removeCallbacks(mShowDelayRunnable);
-                            //离开屏幕超过一定时间才判断为需要显示设置面板
-                            mSettingsPanel.postDelayed(mShowDelayRunnable, mDoodleParams.mChangePanelVisibilityDelay);
-                            break;
-                    }
-                }
-
-                return false;
             }
         });
 

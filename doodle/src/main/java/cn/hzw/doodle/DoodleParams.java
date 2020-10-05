@@ -3,6 +3,7 @@ package cn.hzw.doodle;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,9 +17,9 @@ public class DoodleParams implements Parcelable {
     /**
      * 图片路径
      */
-    public String mImagePath;
+    public Uri mImageUri;
     /**
-     * 　保存路径，如果为null，则图片保存在根目录下/DCIM/Doodle/
+     * 　保存路径，如果为null，则图片保存在应用内部存储区的子目录/Doodle/
      */
     public String mSavePath;
     /**
@@ -90,7 +91,7 @@ public class DoodleParams implements Parcelable {
         @Override
         public DoodleParams createFromParcel(Parcel in) {
             DoodleParams params = new DoodleParams();
-            params.mImagePath = in.readString();
+            params.mImageUri = Uri.parse(in.readString());
             params.mSavePath = in.readString();
             params.mSavePathIsDir = in.readInt() == 1;
             params.mIsDrawableOutside = in.readInt() == 1;
@@ -116,7 +117,7 @@ public class DoodleParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mImagePath);
+        dest.writeString(mImageUri.toString());
         dest.writeString(mSavePath);
         dest.writeInt(mSavePathIsDir ? 1 : 0);
         dest.writeInt(mIsDrawableOutside ? 1 : 0);

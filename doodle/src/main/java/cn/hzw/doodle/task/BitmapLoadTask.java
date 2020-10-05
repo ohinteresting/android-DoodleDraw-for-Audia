@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -41,7 +42,7 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
     private final Context mContext;
     private Uri mInputUri;
-    private Uri mOutputUri;
+    private String mOutputFilePath;
     private final int mRequiredWidth;
     private final int mRequiredHeight;
 
@@ -65,12 +66,12 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
     }
 
     public BitmapLoadTask(@NonNull Context context,
-                          @NonNull Uri inputUri, @Nullable Uri outputUri,
+                          @NonNull Uri inputUri, @Nullable String filePath,
                           int requiredWidth, int requiredHeight,
                           BitmapLoadCallback loadCallback) {
         mContext = context;
         mInputUri = inputUri;
-        mOutputUri = outputUri;
+        mOutputFilePath = filePath;
         mRequiredWidth = requiredWidth;
         mRequiredHeight = requiredHeight;
         mBitmapLoadCallback = loadCallback;
@@ -148,18 +149,21 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         Log.d(TAG, "Uri scheme: " + inputUriScheme);
         if ("http".equals(inputUriScheme) || "https".equals(inputUriScheme)) {
             try {
-                downloadFile(mInputUri, mOutputUri);
+                downloadFile(mInputUri, Uri.fromFile(new File(mOutputFilePath)));
             } catch (NullPointerException | IOException e) {
                 Log.e(TAG, "Downloading failed", e);
                 throw e;
             }
         } else if ("content".equals(inputUriScheme)) {
             try {
-                copyFile(mInputUri, mOutputUri);
+                copyFile(mInputUri, Uri.fromFile(new File(mOutputFilePath)));
             } catch (NullPointerException | IOException e) {
                 Log.e(TAG, "Copying failed", e);
                 throw e;
             }
+            ///[FIX#BitmapLoadTask#processInputUri()]mInputUri.getScheme()为空即为file
+        } else if (TextUtils.isEmpty(inputUriScheme)) {
+            mInputUri = Uri.fromFile(new File(mInputUri.toString()));
         } else if (!"file".equals(inputUriScheme)) {
             Log.e(TAG, "Invalid Uri scheme " + inputUriScheme);
             throw new IllegalArgumentException("Invalid Uri scheme" + inputUriScheme);
@@ -193,7 +197,7 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
             // swap uris, because input image was copied to the output destination
             // (cropped image will override it later)
-            mInputUri = mOutputUri;
+            mInputUri = Uri.fromFile(new File(mOutputFilePath));
         }
     }
 
@@ -233,14 +237,14 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
             // swap uris, because input image was downloaded to the output destination
             // (cropped image will override it later)
-            mInputUri = mOutputUri;
+            mInputUri = Uri.fromFile(new File(mOutputFilePath));
         }
     }
 
     @Override
     protected void onPostExecute(@NonNull BitmapWorkerResult result) {
         if (result.mBitmapWorkerException == null) {
-            mBitmapLoadCallback.onBitmapLoaded(result.mBitmapResult, result.mExifInfo, mInputUri.getPath(), (mOutputUri == null) ? null : mOutputUri.getPath());
+            mBitmapLoadCallback.onBitmapLoaded(result.mBitmapResult, result.mExifInfo, mInputUri.getPath(), mOutputFilePath);
         } else {
             mBitmapLoadCallback.onFailure(result.mBitmapWorkerException);
         }
