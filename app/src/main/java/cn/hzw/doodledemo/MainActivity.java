@@ -102,9 +102,9 @@ public class MainActivity extends Activity {
                 // 图片路径
                 params.mImageUri = Uri.parse(list.get(0));
 
-                ///[处理网络图片]
-                params.mImageUri = Uri.parse("http://ljdy.tv/demo/image.jpg");
-                params.mSavePath = new File(getFilesDir(), "test.jpg").getAbsolutePath();
+//                ///[处理网络图片]
+//                params.mImageUri = Uri.parse("http://ljdy.tv/demo/image.jpg");
+//                params.mSavePath = new File(getFilesDir(), "test.jpg").getAbsolutePath();
 
                 // 初始画笔大小
                 params.mPaintUnitSize = DoodleView.DEFAULT_SIZE;
