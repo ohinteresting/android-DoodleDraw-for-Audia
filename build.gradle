@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "16.1.1",   ///v16.1.1#使用com.github.yongtiger:android-ImageTools
-                versionCode: 160101
+                versionName: "16.1.2",   ///v16.1.2#[FIX#API 29及以上，ColorPickerDialog底部被（软）导航栏遮盖]
+                versionCode: 160102
         ]
     }
 
