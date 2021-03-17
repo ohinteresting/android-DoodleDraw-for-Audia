@@ -1,4 +1,6 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+}
 
 ///[jitpack#publish]https://jitpack.io/docs/ANDROID/
 apply plugin: 'com.github.dcendents.android-maven'
@@ -13,23 +15,31 @@ android {
         targetSdkVersion setup.targetSdk
         versionCode release.versionCode
         versionName release.versionName
+
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation "androidx.exifinterface:exifinterface:1.3.0"
 
-    implementation "com.squareup.okhttp3:okhttp:3.12.1"
+    implementation "androidx.exifinterface:exifinterface:1.3.2"
+
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
 
 //    // https://github.com/1993hzw/Androids
 //    api 'com.github.1993hzw:Androids:1.3'
-    api 'com.github.yongtiger:android-ImageTools:v10.0.3'
+    api 'com.github.yongtiger:android-ImageTools:v10.0.4'
 }

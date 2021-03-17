@@ -22,11 +22,12 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:1.2.0"
-    implementation "androidx.core:core:1.3.2"
-
     implementation project(':doodle')
+
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation "androidx.appcompat:appcompat:1.2.0"
+
     implementation ('cn.hzw.imageselector:library:1.0'){
         transitive = false
     }
