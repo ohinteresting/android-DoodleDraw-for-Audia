@@ -8,29 +8,46 @@ buildscript {
         ]
 
         release = [
-                versionName: "16.1.3",   ///v16.1.3
-                versionCode: 160103
+                versionName: "16.1.4",   ///v16.1.4#AndroidManifest#DoodleActivity#必须设置为固定屏幕方向，否则翻屏时会丢失全部修改！
+                versionCode: 160104
         ]
     }
 
     repositories {
+        mavenCentral()
         google()
-        jcenter()
+//        maven {
+//            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        }
+//        jcenter()   //////??????Please remove usages of `jcenter()` Maven repository from your build scripts and migrate your build to other Maven repositories. This repository is deprecated and it will be shut down in the future
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:4.2.0'
 
         ///[jitpack#publish]https://jitpack.io/docs/ANDROID/
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
 
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
-        maven { url 'https://jitpack.io' }
+        mavenCentral()
         google()
+        maven { url 'https://jitpack.io' }
+//        maven {
+//            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        }
+//        jcenter()   //////??????Please remove usages of `jcenter()` Maven repository from your build scripts and migrate your build to other Maven repositories. This repository is deprecated and it will be shut down in the future
+
+        //////??????TODO: Remove jcenter() once available in Maven Central.
+        jcenter() {
+            content {
+            }
+        }
     }
 }
 
