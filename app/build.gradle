@@ -26,11 +26,15 @@ dependencies {
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation "androidx.appcompat:appcompat:1.2.0"
+    implementation "androidx.appcompat:appcompat:1.3.0"
 
     implementation ('cn.hzw.imageselector:library:1.0'){
         transitive = false
     }
+
+//    // https://github.com/1993hzw/Androids
+//    implementation 'com.github.1993hzw:Androids:1.3'
+    implementation 'com.github.yongtiger:android-ImageTools:v10.0.5'
 
 /*    // test
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
