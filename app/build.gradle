@@ -34,9 +34,9 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:1.3.1"
 
-    implementation ('cn.hzw.imageselector:library:1.0'){
-        transitive = false
-    }
+//    implementation ('cn.hzw.imageselector:library:1.0'){
+//        transitive = false
+//    }
 
 //    // https://github.com/1993hzw/Androids
 //    implementation 'com.github.1993hzw:Androids:1.3'

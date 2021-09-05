@@ -25,8 +25,8 @@ import cn.hzw.doodle.DoodleActivity;
 import cn.hzw.doodle.DoodleParams;
 import cn.hzw.doodle.DoodleView;
 import cn.hzw.doodledemo.guide.DoodleGuideActivity;
-import cn.hzw.imageselector.ImageLoader;
-import cn.hzw.imageselector.ImageSelectorActivity;
+//import cn.hzw.imageselector.ImageLoader;
+//import cn.hzw.imageselector.ImageSelectorActivity;
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
 public class MainActivity extends Activity {
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_select_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageSelectorActivity.startActivityForResult(REQ_CODE_SELECT_IMAGE, MainActivity.this, null, false);
+//                ImageSelectorActivity.startActivityForResult(REQ_CODE_SELECT_IMAGE, MainActivity.this, null, false);
             }
         });
 
@@ -92,30 +92,30 @@ public class MainActivity extends Activity {
             if (data == null) {
                 return;
             }
-            ArrayList<String> list = data.getStringArrayListExtra(ImageSelectorActivity.KEY_PATH_LIST);
-            if (list != null && list.size() > 0) {
-                LogUtil.d("Doodle", list.get(0));
-
-                // 涂鸦参数
-                DoodleParams params = new DoodleParams();
-                params.mIsFullScreen = true;
-                // 图片路径
-                params.mImageUri = Uri.parse(list.get(0));
-
-//                ///[处理网络图片]
-//                params.mImageUri = Uri.parse("http://ljdy.tv/demo/image.jpg");
-//                params.mSavePath = new File(getFilesDir(), "test.jpg").getAbsolutePath();
-
-                // 初始画笔大小
-                params.mPaintUnitSize = DoodleView.DEFAULT_SIZE;
-                // 画笔颜色
-                params.mPaintColor = Color.RED;
-                // 是否支持缩放item
-                params.mSupportScaleItem = true;
-
-                // 启动涂鸦页面
-                DoodleActivity.startActivityForResult(MainActivity.this, params, REQ_CODE_DOODLE);
-            }
+//            ArrayList<String> list = data.getStringArrayListExtra(ImageSelectorActivity.KEY_PATH_LIST);
+//            if (list != null && list.size() > 0) {
+//                LogUtil.d("Doodle", list.get(0));
+//
+//                // 涂鸦参数
+//                DoodleParams params = new DoodleParams();
+//                params.mIsFullScreen = true;
+//                // 图片路径
+//                params.mImageUri = Uri.parse(list.get(0));
+//
+////                ///[处理网络图片]
+////                params.mImageUri = Uri.parse("http://ljdy.tv/demo/image.jpg");
+////                params.mSavePath = new File(getFilesDir(), "test.jpg").getAbsolutePath();
+//
+//                // 初始画笔大小
+//                params.mPaintUnitSize = DoodleView.DEFAULT_SIZE;
+//                // 画笔颜色
+//                params.mPaintColor = Color.RED;
+//                // 是否支持缩放item
+//                params.mSupportScaleItem = true;
+//
+//                // 启动涂鸦页面
+//                DoodleActivity.startActivityForResult(MainActivity.this, params, REQ_CODE_DOODLE);
+//            }
         } else if (requestCode == REQ_CODE_DOODLE) {
             if (data == null) {
                 return;
@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
                 if (TextUtils.isEmpty(path)) {
                     return;
                 }
-                ImageLoader.getInstance(this).display(findViewById(R.id.img), path);
+//                ImageLoader.getInstance(this).display(findViewById(R.id.img), path);
                 mPath.setText(path);
             } else if (resultCode == DoodleActivity.RESULT_ERROR) {
                 Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_SHORT).show();
