@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.0.3",   ///v17.0.3#update gradle for 'cn.hzw.imageselector:library:1.0'
-                versionCode: 170003
+                versionName: "17.0.4",   ///v17.0.4#update gradle for 'cn.hzw.imageselector:library:1.0'
+                versionCode: 170004
         ]
     }
 
