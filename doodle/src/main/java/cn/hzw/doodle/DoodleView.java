@@ -37,6 +37,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -178,6 +179,10 @@ public class DoodleView extends FrameLayout implements IDoodle {
         setClipChildren(false);
 
         mBitmap = bitmap;
+        if (mBitmap == null) {
+            throw new RuntimeException("Bitmap is null!!!");
+        }
+
         if (mBitmap.getConfig() != Bitmap.Config.RGB_565) {
             // 如果位图包含透明度，则可能会导致橡皮擦无法对透明部分进行擦除
             LogUtil.w(TAG, "the bitmap may contain alpha, which will cause eraser don't work well.");
@@ -185,9 +190,6 @@ public class DoodleView extends FrameLayout implements IDoodle {
         mDoodleListener = listener;
         if (mDoodleListener == null) {
             throw new RuntimeException("IDoodleListener is null!!!");
-        }
-        if (mBitmap == null) {
-            throw new RuntimeException("Bitmap is null!!!");
         }
 
         mOptimizeDrawing = optimizeDrawing;
@@ -308,7 +310,19 @@ public class DoodleView extends FrameLayout implements IDoodle {
         if (mDoodleBitmap != null) {
             mDoodleBitmap.recycle();
         }
-        mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
+
+        ///[FIX#DoodleView#OutOfMemoryError]
+        try {
+            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
+
+            final int dstWidth = mDoodleBitmap.getWidth() / 2;
+            final int dstHeight = mDoodleBitmap.getHeight() / 2;
+            mDoodleBitmap = Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true);
+        }
+
         mDoodleBitmapCanvas = new Canvas(mDoodleBitmap);
     }
 
