@@ -312,16 +312,24 @@ public class DoodleView extends FrameLayout implements IDoodle {
         }
 
         ///[FIX#DoodleView#OutOfMemoryError]
-        try {
-            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
+//        try {
+//            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
+//        } catch (OutOfMemoryError e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
 
-            final int dstWidth = mDoodleBitmap.getWidth() / 2;
-            final int dstHeight = mDoodleBitmap.getHeight() / 2;
+            final float ratio = (float) mBitmap.getHeight() / mBitmap.getWidth();
+            final int dstHeight;
+            final int dstWidth;
+            if (mBitmap.getHeight() > mBitmap.getWidth()) {
+                dstHeight = Math.min(mBitmap.getHeight(), 1024);
+                dstWidth = dstHeight == mBitmap.getHeight() ? mBitmap.getWidth() : Math.round(dstHeight / ratio);
+            } else {
+                dstWidth = Math.min(mBitmap.getWidth(), 1024);
+                dstHeight = dstWidth == mBitmap.getWidth() ? mBitmap.getHeight() : Math.round(dstWidth * ratio);
+            }
             mDoodleBitmap = Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true);
-        }
+//        }
 
         mDoodleBitmapCanvas = new Canvas(mDoodleBitmap);
     }
