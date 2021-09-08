@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.0.7",   ///v17.0.7#[FIX#Bitmap#OutOfMemoryError]
-                versionCode: 170007
+                versionName: "17.0.8",   ///v17.0.8#[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
+                versionCode: 170008
         ]
     }
 

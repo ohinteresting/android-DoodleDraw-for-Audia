@@ -58,6 +58,7 @@ import cn.hzw.doodle.core.IDoodlePen;
 import cn.hzw.doodle.core.IDoodleShape;
 import cn.hzw.doodle.core.IDoodleTouchDetector;
 
+import static cn.hzw.doodle.util.BitmapLoadUtils.convertToMutable;
 import static cn.hzw.doodle.util.DrawUtil.drawCircle;
 import static cn.hzw.doodle.util.DrawUtil.drawRect;
 import static cn.hzw.doodle.util.DrawUtil.rotatePoint;
@@ -312,11 +313,11 @@ public class DoodleView extends FrameLayout implements IDoodle {
         }
 
         ///[FIX#DoodleView#OutOfMemoryError]
-//        try {
-//            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
-//        } catch (OutOfMemoryError e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
+        try {
+            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
 
             final float ratio = (float) mBitmap.getHeight() / mBitmap.getWidth();
             final int dstHeight;
@@ -328,8 +329,9 @@ public class DoodleView extends FrameLayout implements IDoodle {
                 dstWidth = Math.min(mBitmap.getWidth(), 1024);
                 dstHeight = dstWidth == mBitmap.getWidth() ? mBitmap.getHeight() : Math.round(dstWidth * ratio);
             }
-            mDoodleBitmap = Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true);
-//        }
+            ///[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
+            mDoodleBitmap = convertToMutable(getContext(), Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true) ,false);
+        }
 
         mDoodleBitmapCanvas = new Canvas(mDoodleBitmap);
     }
