@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.0.8",   ///v17.0.8#[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
-                versionCode: 170008
+                versionName: "17.0.9",   ///v17.0.9#[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
+                versionCode: 170009
         ]
     }
 

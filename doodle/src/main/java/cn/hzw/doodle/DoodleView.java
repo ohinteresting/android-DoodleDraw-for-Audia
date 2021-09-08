@@ -63,6 +63,8 @@ import static cn.hzw.doodle.util.DrawUtil.drawCircle;
 import static cn.hzw.doodle.util.DrawUtil.drawRect;
 import static cn.hzw.doodle.util.DrawUtil.rotatePoint;
 
+import androidx.annotation.Nullable;
+
 /**
  * 涂鸦框架
  * Created by huangziwei on 2016/9/3.
@@ -313,25 +315,7 @@ public class DoodleView extends FrameLayout implements IDoodle {
         }
 
         ///[FIX#DoodleView#OutOfMemoryError]
-        try {
-            mDoodleBitmap = mBitmap.copy(mBitmap.getConfig(), true);
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
-
-            final float ratio = (float) mBitmap.getHeight() / mBitmap.getWidth();
-            final int dstHeight;
-            final int dstWidth;
-            if (mBitmap.getHeight() > mBitmap.getWidth()) {
-                dstHeight = Math.min(mBitmap.getHeight(), 1024);
-                dstWidth = dstHeight == mBitmap.getHeight() ? mBitmap.getWidth() : Math.round(dstHeight / ratio);
-            } else {
-                dstWidth = Math.min(mBitmap.getWidth(), 1024);
-                dstHeight = dstWidth == mBitmap.getWidth() ? mBitmap.getHeight() : Math.round(dstWidth * ratio);
-            }
-            ///[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
-            mDoodleBitmap = convertToMutable(getContext(), Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true) ,false);
-        }
+        mDoodleBitmap = copyBitmap();
 
         mDoodleBitmapCanvas = new Canvas(mDoodleBitmap);
     }
@@ -812,14 +796,21 @@ public class DoodleView extends FrameLayout implements IDoodle {
                     refreshDoodleBitmap(true);
                     savedBitmap = mDoodleBitmap;
                 } else {
-                    savedBitmap = mBitmap.copy(mBitmap.getConfig(), true);
-                    Canvas canvas = new Canvas(savedBitmap);
-                    for (IDoodleItem item : mItemStack) {
-                        item.draw(canvas);
+
+                    ///[FIX#DoodleView#OutOfMemoryError]
+                    savedBitmap = copyBitmap();
+
+                    if (savedBitmap != null) {
+                        Canvas canvas = new Canvas(savedBitmap);
+                        for (IDoodleItem item : mItemStack) {
+                            item.draw(canvas);
+                        }
                     }
                 }
 
-                savedBitmap = ImageUtils.rotate(savedBitmap, mDoodleRotateDegree, true);
+                if (savedBitmap != null)
+                    savedBitmap = ImageUtils.rotate(savedBitmap, mDoodleRotateDegree, true);
+
                 return savedBitmap;
             }
 
@@ -837,6 +828,34 @@ public class DoodleView extends FrameLayout implements IDoodle {
                 });
             }
         }.execute();
+    }
+
+    ///[FIX#DoodleView#OutOfMemoryError]
+    @Nullable
+    private Bitmap copyBitmap() {
+        Bitmap bitmap = null;
+
+        try {
+            bitmap = mBitmap.copy(mBitmap.getConfig(), true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            Log.e(TAG, "initDoodleBitmap: OutOfMemoryError: ", e);
+
+            final float ratio = (float) mBitmap.getHeight() / mBitmap.getWidth();
+            final int dstHeight;
+            final int dstWidth;
+            if (mBitmap.getHeight() > mBitmap.getWidth()) {
+                dstHeight = Math.min(mBitmap.getHeight(), 1024);
+                dstWidth = dstHeight == mBitmap.getHeight() ? mBitmap.getWidth() : Math.round(dstHeight / ratio);
+            } else {
+                dstWidth = Math.min(mBitmap.getWidth(), 1024);
+                dstHeight = dstWidth == mBitmap.getWidth() ? mBitmap.getHeight() : Math.round(dstWidth * ratio);
+            }
+            ///[FIX#java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor]
+            bitmap = convertToMutable(getContext(), Bitmap.createScaledBitmap(mBitmap, dstWidth, dstHeight, true) ,false);
+        }
+
+        return bitmap;
     }
 
     /**
