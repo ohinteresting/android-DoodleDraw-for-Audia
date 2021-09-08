@@ -51,19 +51,18 @@ public class BitmapLoadUtils {
         return bitmap;
     }
 
-    public static int calculateInSampleSize(@NonNull BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    ///[FIX#Bitmap#OutOfMemoryError]
+    ///https://developer.android.com/topic/performance/graphics/load-bitmap
+    public static int calculateInSampleSize(@NonNull BitmapFactory.Options options, int maxWidth, int maxHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width lower or equal to the requested height and width.
-            while ((height / inSampleSize) > reqHeight || (width / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
+        while (height / inSampleSize >= maxHeight || width / inSampleSize >= maxWidth) {
+            inSampleSize *= 2;
         }
+
         return inSampleSize;
     }
 

@@ -186,7 +186,7 @@ public class DoodleActivity extends Activity {
 
 
         ///[处理网络图片]
-        BitmapLoadUtils.decodeBitmapInBackground(this, mImageUri, mDoodleParams.mSavePath, 0, 0,
+        BitmapLoadUtils.decodeBitmapInBackground(this, mImageUri, mDoodleParams.mSavePath, 1024, 1024,
                 new BitmapLoadCallback() {
 
                     @Override

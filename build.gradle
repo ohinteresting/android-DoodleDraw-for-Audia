@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.0.5",   ///v17.0.5#[FIX#DoodleView#OutOfMemoryError]
-                versionCode: 170005
+                versionName: "17.0.6",   ///v17.0.6#[FIX#Bitmap#OutOfMemoryError]
+                versionCode: 170006
         ]
     }
 
