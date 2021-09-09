@@ -39,7 +39,7 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
     private static final String TAG = "BitmapWorkerTask";
 
-    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024;   // 100 MB
+    private static final int MAX_BITMAP_SIZE = 10 * 1024 * 1024;   // 10 MB
 
     private final Context mContext;
     private Uri mInputUri;
