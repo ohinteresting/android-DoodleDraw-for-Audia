@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.0.10",   ///v17.0.10#MAX_BITMAP_SIZE = 10 * 1024 * 1024;
-                versionCode: 170010
+                versionName: "17.1.0",   ///v17.1.0#语言环境
+                versionCode: 170100
         ]
     }
 
