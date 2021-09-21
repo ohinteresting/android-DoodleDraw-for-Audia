@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.1.0",   ///v17.1.0#语言环境
-                versionCode: 170100
+                versionName: "17.1.1",   ///v17.1.1
+                versionCode: 170101
         ]
     }
 

@@ -654,7 +654,7 @@ public class DoodleActivity extends Activity {
         } else if (v.getId() == R.id.doodle_btn_finish) {
             mDoodle.save();
         } else if (v.getId() == R.id.doodle_btn_back) {
-            if (mDoodle.getAllItem() == null || mDoodle.getItemCount() == 0) {
+            if (mDoodle == null || mDoodle.getAllItem() == null || mDoodle.getItemCount() == 0) {
                 finish();
                 return;
             }
