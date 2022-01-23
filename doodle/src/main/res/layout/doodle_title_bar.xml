@@ -34,7 +34,7 @@
             android:id="@+id/doodle_txt_title"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginLeft="12dp"
+            android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="center_vertical"
