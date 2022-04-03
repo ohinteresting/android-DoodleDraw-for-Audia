@@ -20,7 +20,7 @@ afterEvaluate {
 
 android {
     compileSdkVersion setup.compileSdk
-    buildToolsVersion setup.buildTools
+//    buildToolsVersion setup.buildTools
 
     defaultConfig {
         minSdkVersion setup.minSdk
@@ -52,5 +52,5 @@ dependencies {
 
 //    // https://github.com/1993hzw/Androids
 //    implementation 'com.github.1993hzw:Androids:1.3'
-    implementation 'com.github.yongtiger:android-ImageTools:v10.2.0'
+    implementation 'com.github.yongtiger:android-ImageTools:v10.3.0'
 }
