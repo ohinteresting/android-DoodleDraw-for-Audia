@@ -592,6 +592,10 @@ public class DoodleActivity extends Activity {
     private ValueAnimator mRotateAnimator;
 
     public void onClick(final View v) {
+        if (mDoodle == null) {
+            return;
+        }
+
         if (v.getId() == R.id.btn_pen_hand) {
             mDoodle.setPen(DoodlePen.BRUSH);
         } else if (v.getId() == R.id.btn_pen_mosaic) {

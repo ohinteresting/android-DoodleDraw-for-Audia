@@ -8,8 +8,8 @@ buildscript {
         ]
 
         release = [
-                versionName: "17.3.0",   ///v17.3.0#update gradle:7.1.2
-                versionCode: 170300
+                versionName: "17.3.1",   ///v17.3.1#fix#DoodleActivity#onClick()#mDoodle == null
+                versionCode: 170301
         ]
     }
 
