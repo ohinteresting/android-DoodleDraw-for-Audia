@@ -5,7 +5,7 @@
 
         <!--///注意：必须设置为固定屏幕方向，否则翻屏时会丢失全部修改！-->
         <activity android:name=".DoodleActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="landscape" />
 
     </application>
 
